@@ -21,6 +21,38 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// Initialize Supabase table if it doesn't exist
+async function initializeSupabase() {
+  try {
+    const { data, error } = await supabase.from('summaries').select('*').limit(1);
+    if (error && error.code === '42P01') {
+      console.log('Supabase connected, but table does not exist. Creating table...');
+      const { error: createError } = await supabase.rpc('execute_sql', {
+        sql: `CREATE TABLE summaries (
+          id serial PRIMARY KEY,
+          url text,
+          summary text,
+          urdu_summary text
+        );`
+      });
+      if (createError) {
+        console.error('Failed to create summaries table:', createError.message);
+      } else {
+        console.log('Summaries table created successfully.');
+      }
+    } else if (error) {
+      console.error('Supabase connection error:', error.message);
+    } else {
+      console.log('Supabase connected and summaries table exists.');
+    }
+  } catch (err) {
+    console.error('Supabase connection check failed:', err.message);
+  }
+}
+
+// Initialize Supabase on module load
+initializeSupabase();
+
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');

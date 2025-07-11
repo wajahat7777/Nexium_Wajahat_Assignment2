@@ -18,7 +18,7 @@ import {
   BookOpen
 } from "lucide-react";
 
-const BACKEND_URL = "https://nexium-wajahat-assignment2-41na.vercel.app";
+const BACKEND_URL ="https://nexium-wajahat-assignment2-41na.vercel.app";
 
 interface SummariseResponse {
   fullText: string;

@@ -1,77 +1,36 @@
-const axios = require('axios');
+const translateToUrdu = require('./translate-helper');
 
-async function translateToUrdu(text) {
-  console.log('🌍 Starting Urdu translation...');
+module.exports = async (req, res) => {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  console.log('=== POST /api/translate endpoint hit ===');
+  console.log('Request body:', req.body);
   
-  // Priority: LibreTranslate (with API key support)
-  try {
-    console.log('🔄 Trying LibreTranslate...');
-    const response = await axios.post(
-      'https://libretranslate.de/translate',
-      {
-        q: text,
-        source: 'en',
-        target: 'ur',
-        api_key: 'free' // Replace with your key if available
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
-      }
-    );
-    
-    if (response.data && response.data.translatedText) {
-      console.log('✅ LibreTranslate successful');
-      return response.data.translatedText;
-    }
-  } catch (error) {
-    console.log('❌ LibreTranslate failed:', error.message);
+  const { text } = req.body;
+  if (!text) {
+    console.log('❌ No text provided');
+    return res.status(400).json({ error: 'Text is required' });
   }
-
-  // Fallback: MyMemory (free, no key required)
+  
   try {
-    console.log('🔄 Trying MyMemory...');
-    const response = await axios.get(
-      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ur`,
-      { timeout: 30000 }
-    );
-    
-    if (response.data && response.data.responseData && response.data.responseData.translatedText) {
-      console.log('✅ MyMemory successful');
-      return response.data.responseData.translatedText;
-    }
-  } catch (error) {
-    console.log('❌ MyMemory failed:', error.message);
+    const urduSummary = await translateToUrdu(text);
+    console.log('✅ Translation completed');
+    res.json({ urduSummary });
+  } catch (err) {
+    console.error('❌ Translation error:', err.message);
+    res.status(500).json({ error: 'Failed to translate text', details: err.message });
   }
-
-  // Final fallback: Yandex (free tier)
-  try {
-    console.log('🔄 Trying Yandex...');
-    const response = await axios.post(
-      'https://translate.yandex.net/api/v1.5/tr.json/translate',
-      null,
-      {
-        params: {
-          key: 'free', // Replace with your key
-          text: text,
-          lang: 'en-ur',
-          format: 'plain'
-        },
-        timeout: 30000
-      }
-    );
-    
-    if (response.data && response.data.text && response.data.text[0]) {
-      console.log('✅ Yandex successful');
-      return response.data.text[0];
-    }
-  } catch (error) {
-    console.log('❌ Yandex failed:', error.message);
-  }
-
-  // Ultimate fallback: Return original text with note
-  console.log('❌ All translation services failed, returning original text');
-  return `${text} (ترجمہ دستیاب نہیں - Translation not available)`;
-}
-
-module.exports = translateToUrdu; 
+}; 
