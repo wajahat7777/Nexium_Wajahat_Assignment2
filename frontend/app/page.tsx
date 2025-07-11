@@ -57,7 +57,7 @@ export default function Home() {
     setLoading(true);
     
     try {
-      const res = await fetch(`${BACKEND_URL}/summarise`, {
+      const res = await fetch(`${BACKEND_URL}/api/summarise`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
