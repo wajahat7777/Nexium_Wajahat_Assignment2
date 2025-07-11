@@ -57,11 +57,17 @@ export default function Home() {
     setLoading(true);
     
     try {
+      console.log('🔍 Making request to:', `${BACKEND_URL}/api/summarise`);
+      console.log('📤 Request body:', { url });
+      
       const res = await fetch(`${BACKEND_URL}/api/summarise`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
+      
+      console.log('📥 Response status:', res.status);
+      console.log('📥 Response ok:', res.ok);
       
       if (!res.ok) {
         let errorData: ErrorResponse = { error: 'Unknown error' };
