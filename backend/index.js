@@ -216,7 +216,13 @@ async function initializeSupabase() {
   }
 }
 
-initializeSupabase().then(() => {
-  const PORT = process.env.PORT || 4000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}); 
+// For Vercel deployment
+module.exports = app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  initializeSupabase().then(() => {
+    const PORT = process.env.PORT || 4000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  });
+} 
