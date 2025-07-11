@@ -17,14 +17,21 @@ const summarise = require('./summarise-helper');
 const translateToUrdu = require('./translate-helper');
 
 // Connect to MongoDB
+console.log('🔌 Attempting MongoDB connection...');
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => {
+  console.log('✅ MongoDB connected successfully');
+  console.log('📊 MongoDB connection state:', mongoose.connection.readyState);
+})
+.catch(err => {
+  console.error('❌ MongoDB connection error:', err.message);
+  console.error('❌ MongoDB error details:', err);
+});
 
 // Initialize Supabase table if it doesn't exist
 async function initializeSupabase() {

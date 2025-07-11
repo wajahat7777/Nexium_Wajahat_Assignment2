@@ -6,6 +6,10 @@ async function summarise(text) {
   // Priority: Hugging Face (with API key)
   try {
     console.log('🔄 Trying Hugging Face...');
+    console.log('🔑 API Key exists:', !!process.env.HUGGINGFACE_API_KEY);
+    console.log('🔑 API Key length:', process.env.HUGGINGFACE_API_KEY ? process.env.HUGGINGFACE_API_KEY.length : 0);
+    console.log('🔑 API Key starts with:', process.env.HUGGINGFACE_API_KEY ? process.env.HUGGINGFACE_API_KEY.substring(0, 10) + '...' : 'undefined');
+    
     const response = await axios.post(
       'https://api-inference.huggingface.co/models/facebook/bart-large-cnn',
       { inputs: text },
