@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
 
   console.log('=== POST /summarise endpoint hit ===');
   console.log('Request body:', req.body);
+  console.log('Environment check - HUGGINGFACE_API_KEY exists:', !!process.env.HUGGINGFACE_API_KEY);
   
   const { url } = req.body;
   if (!url) {
@@ -106,6 +107,7 @@ module.exports = async (req, res) => {
     
   } catch (err) {
     console.error('❌ Error in /summarise:', err.message);
+    console.error('❌ Error stack:', err.stack);
     
     if (err.code === 'ECONNABORTED') {
       return res.status(408).json({ error: 'Request timeout - URL took too long to respond' });
