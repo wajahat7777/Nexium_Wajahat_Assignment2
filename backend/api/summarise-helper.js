@@ -15,7 +15,7 @@ async function summarise(text) {
       { inputs: text },
       {
         headers: {
-          'Authorization': 'Bearer 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',
+          'Authorization': 'Bearer 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',
           'Content-Type': 'application/json'
         },
         timeout: 30000
