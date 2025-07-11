@@ -1,65 +1,127 @@
 const axios = require('axios');
+const mongoose = require('mongoose');
+const cheerio = require('cheerio');
+const { createClient } = require('@supabase/supabase-js');
 
-async function summarise(text) {
-  console.log('🤖 Starting summarization...');
-  
-  // Priority: Hugging Face (with API key)
-  try {
-    console.log('🔄 Trying Hugging Face...');
-    const response = await axios.post(
-      'https://api-inference.huggingface.co/models/facebook/bart-large-cnn',
-      { inputs: text },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000
-      }
-    );
-    
-    if (response.data && response.data[0] && response.data[0].summary_text) {
-      console.log('✅ Hugging Face summary successful');
-      return response.data[0].summary_text;
-    }
-  } catch (error) {
-    console.log('❌ Hugging Face failed:', error.message);
+// MongoDB Configuration
+const MONGODB_URI = "mongodb+srv://wajahat:hello@cluster0.ts6enj7.mongodb.net/blogdb?retryWrites=true&w=majority&appName=Cluster0";
+
+// Supabase Configuration
+const SUPABASE_URL = 'https://vkfqoiuukmrnmvckexmk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrZnFvaXV1a21ybm12Y2tleG1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1MzE4NjksImV4cCI6MjA2NzEwNzg2OX0.dZHF_azyQMHMHE831cdUnTHzc1jLWG0zqDZtghij0b4';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Import models and functions
+const Blog = require('../models/Blog');
+const summarise = require('./summarise-helper');
+const translateToUrdu = require('./translate');
+
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+module.exports = async (req, res) => {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
   }
 
-  // Fallback: Cohere (free tier)
-  try {
-    console.log('🔄 Trying Cohere...');
-    const response = await axios.post(
-      'https://api.cohere.ai/v1/summarize',
-      {
-        text: text,
-        length: 'medium',
-        format: 'paragraph'
-      },
-      {
-        headers: {
-          'Authorization': 'Bearer free', // Free tier
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000
-      }
-    );
-    
-    if (response.data && response.data.summary) {
-      console.log('✅ Cohere summary successful');
-      return response.data.summary;
-    }
-  } catch (error) {
-    console.log('❌ Cohere failed:', error.message);
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Final fallback: Basic summarization      
-  console.log('🔄 Using basic summarization...');
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
-  const summary = sentences.slice(0, 3).join('. ') + '.';
+  console.log('=== POST /summarise endpoint hit ===');
+  console.log('Request body:', req.body);
   
-  console.log('✅ Basic summary generated');
-  return summary;
-}
+  const { url } = req.body;
+  if (!url) {
+    console.log('❌ No URL provided');
+    return res.status(400).json({ error: 'URL is required' });
+  }
 
-module.exports = summarise; 
+  console.log('✅ Processing URL:', url);
+
+  try {
+    // Scrape blog text
+    console.log('🔍 Fetching URL:', url);
+    const { data } = await axios.get(url, {
+      timeout: 15000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    console.log('✅ Fetched data, length:', data.length);
+
+    const $ = cheerio.load(data);
+    const text = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 2000);
+    console.log('✅ Scraped text, length:', text.length);
+
+    if (!text || text.length < 20) {
+      console.error('❌ Text too short:', text.length);
+      return res.status(422).json({ error: 'Failed to extract meaningful text from the blog.' });
+    }
+
+    // Generate summary and translation
+    console.log('🤖 Generating summary...');
+    const summary = await summarise(text);
+    console.log('✅ Summary generated');
+
+    console.log('🌍 Generating Urdu translation...');
+    const urduSummary = await translateToUrdu(summary);
+    console.log('✅ Urdu translation generated');
+
+    // Save to databases
+    console.log('💾 Saving to MongoDB...');
+    try {
+      const blog = new Blog({ url, fullText: text });
+      await blog.save();
+      console.log('✅ Full scraped text saved to MongoDB');
+    } catch (mongoErr) {
+      console.error('❌ MongoDB save error:', mongoErr.message);
+    }
+
+    console.log('☁️ Saving to Supabase...');
+    try {
+      const { error: supabaseError } = await supabase.from('summaries').insert([
+        { url, summary, urdu_summary: urduSummary }
+      ]);
+      if (supabaseError) {
+        console.error('❌ Supabase error:', supabaseError.message);
+      } else {
+        console.log('✅ Summary and Urdu translation saved to Supabase');
+      }
+    } catch (supabaseErr) {
+      console.error('❌ Supabase save failed:', supabaseErr.message);
+    }
+
+    console.log('🎉 Success! Returning response');
+    res.json({ fullText: text, summary, urduSummary });
+    
+  } catch (err) {
+    console.error('❌ Error in /summarise:', err.message);
+    
+    if (err.code === 'ECONNABORTED') {
+      return res.status(408).json({ error: 'Request timeout - URL took too long to respond' });
+    }
+    
+    if (err.response?.status === 404) {
+      return res.status(404).json({ error: 'URL not found or inaccessible' });
+    }
+    
+    if (err.code === 'ENOTFOUND') {
+      return res.status(404).json({ error: 'Invalid URL or domain not found' });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to process blog',
+      details: err.message 
+    });
+  }
+}; 
