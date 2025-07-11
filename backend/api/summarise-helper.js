@@ -15,7 +15,7 @@ async function summarise(text) {
       { inputs: text },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          'Authorization': 'Bearer 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',
           'Content-Type': 'application/json'
         },
         timeout: 30000
