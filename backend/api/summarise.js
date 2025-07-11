@@ -11,7 +11,7 @@ async function summarise(text) {
       { inputs: text },
       {
         headers: {
-          'Authorization': 'Bearer hf_xxx', // Replace with your key
+          'Authorization': 'Bearer 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', // Updated with user key
           'Content-Type': 'application/json'
         },
         timeout: 30000
@@ -53,7 +53,7 @@ async function summarise(text) {
     console.log('❌ Cohere failed:', error.message);
   }
 
-  // Final fallback: Basic summarization
+  // Final fallback: Basic summarization      
   console.log('🔄 Using basic summarization...');
   const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const summary = sentences.slice(0, 3).join('. ') + '.';
