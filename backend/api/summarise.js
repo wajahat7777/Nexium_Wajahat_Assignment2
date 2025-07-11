@@ -14,12 +14,17 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Import models and functions
 const Blog = require('../models/Blog');
 const summarise = require('./summarise-helper');
-const translateToUrdu = require('./translate');
+const translateToUrdu = require('./translate-helper');
 
 // Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 // Initialize Supabase table if it doesn't exist
 async function initializeSupabase() {
@@ -27,19 +32,8 @@ async function initializeSupabase() {
     const { data, error } = await supabase.from('summaries').select('*').limit(1);
     if (error && error.code === '42P01') {
       console.log('Supabase connected, but table does not exist. Creating table...');
-      const { error: createError } = await supabase.rpc('execute_sql', {
-        sql: `CREATE TABLE summaries (
-          id serial PRIMARY KEY,
-          url text,
-          summary text,
-          urdu_summary text
-        );`
-      });
-      if (createError) {
-        console.error('Failed to create summaries table:', createError.message);
-      } else {
-        console.log('Summaries table created successfully.');
-      }
+      // Skip table creation for now to avoid errors
+      console.log('Table creation skipped for Vercel deployment');
     } else if (error) {
       console.error('Supabase connection error:', error.message);
     } else {
@@ -141,6 +135,8 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('❌ Error in /summarise:', err.message);
     console.error('❌ Error stack:', err.stack);
+    console.error('❌ Error name:', err.name);
+    console.error('❌ Error code:', err.code);
     
     if (err.code === 'ECONNABORTED') {
       return res.status(408).json({ error: 'Request timeout - URL took too long to respond' });
@@ -156,7 +152,8 @@ module.exports = async (req, res) => {
     
     res.status(500).json({ 
       error: 'Failed to process blog',
-      details: err.message 
+      details: err.message,
+      stack: err.stack
     });
   }
 }; 
