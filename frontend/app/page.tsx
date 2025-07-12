@@ -14,8 +14,15 @@ import {
   Languages, 
   CheckCircle, 
   AlertCircle,
-  Sparkles,
-  BookOpen
+  Brain,
+  BookOpen,
+  Zap,
+  Star,
+  ArrowRight,
+  Copy,
+  Cpu,
+  Target,
+  Rocket
 } from "lucide-react";
 
 const BACKEND_URL ="https://nexium-wajahat-assignment2-41na.vercel.app";
@@ -94,34 +101,73 @@ export default function Home() {
     }
   };
 
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    // You could add a toast notification here
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-blue-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              AI Blog Summarizer
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="relative">
+              <Brain className="h-10 w-10 text-purple-600 animate-pulse" />
+              <div className="absolute inset-0 bg-purple-600 rounded-full opacity-20 animate-ping"></div>
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Smart Blog Summarizer
             </h1>
+            <div className="relative">
+              <Zap className="h-10 w-10 text-yellow-500 animate-bounce" />
+              <div className="absolute inset-0 bg-yellow-500 rounded-full opacity-20 animate-ping animation-delay-1000"></div>
+            </div>
           </div>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Transform any blog into concise summaries with AI-powered insights and instant Urdu translations
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            Transform any blog into concise summaries with intelligent insights and instant Urdu translations
           </p>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Brain className="h-3 w-3 mr-1" />
+              Smart Powered
+            </Badge>
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              <Globe className="h-3 w-3 mr-1" />
+              Multi-Language
+            </Badge>
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+              <Zap className="h-3 w-3 mr-1" />
+              Lightning Fast
+            </Badge>
+          </div>
         </div>
 
         {/* Main Form Card */}
         <div className="max-w-4xl mx-auto">
-          <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-2">
-                <Globe className="h-6 w-6 text-blue-500" />
+          <Card className="shadow-2xl border-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10"></div>
+            <CardHeader className="text-center pb-8 relative z-10">
+              <CardTitle className="text-3xl font-bold flex items-center justify-center gap-3 text-slate-800 dark:text-slate-200">
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
                 Enter Blog URL
               </CardTitle>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">
+                Paste any blog URL and get instant intelligent summaries
+              </p>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <form onSubmit={handleSummarise} className="space-y-4">
-                <div className="relative">
+            <CardContent className="space-y-8 relative z-10">
+              <form onSubmit={handleSummarise} className="space-y-6">
+                <div className="relative group">
                   <Input
                     type="url"
                     placeholder="https://example.com/blog-post"
@@ -129,24 +175,25 @@ export default function Home() {
                     onChange={(e) => setUrl(e.target.value)}
                     disabled={loading}
                     required
-                    className="h-12 text-lg pr-12"
+                    className="h-14 text-lg pr-14 border-2 border-slate-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 rounded-xl"
                   />
-                  <BookOpen className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <BookOpen className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-purple-500 transition-colors" />
                 </div>
                 <Button 
                   type="submit" 
                   disabled={loading} 
-                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 rounded-xl"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="mr-2 h-5 w-5" />
+                      <Brain className="mr-3 h-6 w-6" />
                       Generate Summary
+                      <ArrowRight className="ml-3 h-6 w-6" />
                     </>
                   )}
                 </Button>
@@ -154,16 +201,16 @@ export default function Home() {
 
               {/* Status Messages */}
               {error && (
-                <Alert variant="destructive" className="border-red-200 bg-red-50 dark:bg-red-900/20">
-                  <AlertCircle className="h-4 w-4" />
+                <Alert variant="destructive" className="border-red-200 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                  <AlertCircle className="h-5 w-5" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
               
               {success && (
-                <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
                   <AlertTitle>Success</AlertTitle>
                   <AlertDescription>{success}</AlertDescription>
                 </Alert>
@@ -171,61 +218,103 @@ export default function Home() {
 
               {/* Results Section */}
               {(scrapedText || summary || urduSummary) && (
-                <div className="space-y-6 pt-6">
-                  <Separator />
+                <div className="space-y-8 pt-8">
+                  <Separator className="bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
                   
                   {/* Scraped Text */}
                   {scrapedText && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                        <h3 className="font-semibold text-lg">Original Content</h3>
-                        <Badge variant="secondary" className="ml-auto">
-                          {scrapedText.length} characters
-                        </Badge>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <h3 className="font-bold text-xl text-slate-800 dark:text-slate-200">Original Content</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20">
+                            {scrapedText.length} characters
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(scrapedText, "original")}
+                            className="text-slate-600 hover:text-blue-600"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <Textarea 
                         value={scrapedText} 
                         readOnly 
-                        className="min-h-[120px] resize-none bg-slate-50 dark:bg-slate-900/50"
+                        className="min-h-[150px] resize-none bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-200 focus:border-blue-500 rounded-xl text-slate-700 dark:text-slate-300"
                         placeholder="Original blog content will appear here..."
                       />
                     </div>
                   )}
                   
-                  {/* AI Summary */}
+                  {/* Smart Summary */}
                   {summary && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-purple-500" />
-                        <h3 className="font-semibold text-lg">AI Summary</h3>
-                        <Badge variant="outline" className="ml-auto bg-purple-50 text-purple-700 dark:bg-purple-900/20">
-                          AI Generated
-                        </Badge>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Cpu className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <h3 className="font-bold text-xl text-slate-800 dark:text-slate-200">Smart Summary</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 border-purple-200">
+                            Intelligent
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(summary, "summary")}
+                            className="text-slate-600 hover:text-purple-600"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <Textarea 
                         value={summary} 
                         readOnly 
-                        className="min-h-[100px] resize-none bg-purple-50 dark:bg-purple-900/20 border-purple-200"
-                        placeholder="AI-generated summary will appear here..."
+                        className="min-h-[120px] resize-none bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 focus:border-purple-500 rounded-xl text-slate-700 dark:text-slate-300"
+                        placeholder="Intelligent summary will appear here..."
                       />
                     </div>
                   )}
                   
                   {/* Urdu Translation */}
                   {urduSummary && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Languages className="h-5 w-5 text-green-500" />
-                        <h3 className="font-semibold text-lg">Urdu Translation</h3>
-                        <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 dark:bg-green-900/20">
-                          اردو
-                        </Badge>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Languages className="h-5 w-5 text-green-600" />
+                          </div>
+                          <h3 className="font-bold text-xl text-slate-800 dark:text-slate-200">Urdu Translation</h3>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/20 border-green-200">
+                            اردو
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(urduSummary, "urdu")}
+                            className="text-slate-600 hover:text-green-600"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <Textarea 
                         value={urduSummary} 
                         readOnly 
-                        className="min-h-[100px] resize-none bg-green-50 dark:bg-green-900/20 border-green-200 font-[Noto Nastaliq Urdu], serif text-right"
+                        className="min-h-[120px] resize-none bg-green-50 dark:bg-green-900/20 border-2 border-green-200 focus:border-green-500 rounded-xl font-[Noto Nastaliq Urdu], serif text-right text-slate-700 dark:text-slate-300"
                         placeholder="Urdu translation will appear here..."
                       />
                     </div>
@@ -236,36 +325,43 @@ export default function Home() {
           </Card>
 
           {/* Features Section */}
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
-            <Card className="text-center p-6 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-6 w-6 text-blue-600" />
+          <div className="mt-16 grid md:grid-cols-3 gap-8">
+            <Card className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Brain className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-semibold mb-2">AI-Powered</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Advanced AI models generate intelligent summaries
+              <h3 className="font-bold text-xl mb-3 text-slate-800 dark:text-slate-200">Smart Powered</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Advanced intelligent models generate smart summaries with deep understanding of content
               </p>
             </Card>
             
-            <Card className="text-center p-6 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Languages className="h-6 w-6 text-purple-600" />
+            <Card className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Languages className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-semibold mb-2">Multi-Language</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Instant Urdu translations with multiple fallback services
+              <h3 className="font-bold text-xl mb-3 text-slate-800 dark:text-slate-200">Multi-Language</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Instant Urdu translations with multiple fallback services for reliability
               </p>
             </Card>
             
-            <Card className="text-center p-6 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <FileText className="h-6 w-6 text-green-600" />
+            <Card className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 rounded-2xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Rocket className="h-8 w-8 text-white" />
               </div>
-              <h3 className="font-semibold mb-2">Smart Storage</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Full content in MongoDB, summaries in Supabase
+              <h3 className="font-bold text-xl mb-3 text-slate-800 dark:text-slate-200">Lightning Fast</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Get results in seconds with optimized processing and smart caching
               </p>
             </Card>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-16 text-slate-500 dark:text-slate-400">
+            <p className="text-sm">
+              Powered by Intelligent Technology • Built with Next.js • Deployed on Vercel
+            </p>
           </div>
         </div>
       </div>
