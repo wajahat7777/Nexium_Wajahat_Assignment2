@@ -3,13 +3,18 @@ const axios = require('axios');
 async function translateToUrdu(text) {
   console.log('🌍 Starting Urdu translation...');
   
+  // Truncate text to prevent "QUERY LENGTH LIMIT EXCEEDED" error
+  // Most free translation services have 500 character limits
+  const truncatedText = text.length > 450 ? text.slice(0, 450) + '...' : text;
+  console.log(`📝 Text length: ${text.length}, truncated to: ${truncatedText.length}`);
+  
   // Priority: LibreTranslate (with API key support)
   try {
     console.log('🔄 Trying LibreTranslate...');
     const response = await axios.post(
       'https://libretranslate.de/translate',
       {
-        q: text,
+        q: truncatedText,
         source: 'en',
         target: 'ur',
         api_key: 'free' // Replace with your key if available
@@ -32,7 +37,7 @@ async function translateToUrdu(text) {
   try {
     console.log('🔄 Trying MyMemory...');
     const response = await axios.get(
-      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ur`,
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(truncatedText)}&langpair=en|ur`,
       { timeout: 30000 }
     );
     
@@ -53,7 +58,7 @@ async function translateToUrdu(text) {
       {
         params: {
           key: 'free', // Replace with your key
-          text: text,
+          text: truncatedText,
           lang: 'en-ur',
           format: 'plain'
         },
@@ -71,7 +76,7 @@ async function translateToUrdu(text) {
 
   // Ultimate fallback: Return original text with note
   console.log('❌ All translation services failed, returning original text');
-  return `${text} (ترجمہ دستیاب نہیں - Translation not available)`;
+  return `${truncatedText} (ترجمہ دستیاب نہیں - Translation not available)`;
 }
 
 module.exports = translateToUrdu; 
