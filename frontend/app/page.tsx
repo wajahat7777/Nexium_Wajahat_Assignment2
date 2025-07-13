@@ -118,17 +118,11 @@ export default function Home() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="relative">
-              <Brain className="h-10 w-10 text-purple-600 animate-pulse" />
-              <div className="absolute inset-0 bg-purple-600 rounded-full opacity-20 animate-ping"></div>
-            </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Smart Blog Summarizer
-            </h1>
-            <div className="relative">
-              <Zap className="h-10 w-10 text-yellow-500 animate-bounce" />
-              <div className="absolute inset-0 bg-yellow-500 rounded-full opacity-20 animate-ping animation-delay-1000"></div>
+          <div className="flex items-center justify-center mb-6">
+            <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-2 border-purple-200 dark:border-purple-700 rounded-2xl px-8 py-6 shadow-lg">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
+                Smart Blog Summarizer
+              </h1>
             </div>
           </div>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
