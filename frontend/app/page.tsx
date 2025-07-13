@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,15 @@ import {
   Copy,
   Cpu,
   Target,
-  Rocket
+  Rocket,
+  Sun,
+  Moon,
+  Download,
+  Share2,
+  Clock,
+  Hash,
+  FileText as FileTextIcon,
+  FileDown
 } from "lucide-react";
 
 const BACKEND_URL ="https://nexium-wajahat-assignment2-41na.vercel.app";
@@ -46,6 +54,104 @@ export default function Home() {
   const [scrapedText, setScrapedText] = useState("");
   const [summary, setSummary] = useState("");
   const [urduSummary, setUrduSummary] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Theme management
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+  // Utility functions
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const getReadingTime = (text: string) => {
+    const wordsPerMinute = 200;
+    const wordCount = getWordCount(text);
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return minutes;
+  };
+
+  const exportToMarkdown = (title: string, content: string) => {
+    const markdown = `# ${title}\n\n${content}`;
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToPDF = async (title: string, content: string) => {
+    // Simple PDF generation using browser print
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+              h1 { color: #4f46e5; border-bottom: 2px solid #4f46e5; padding-bottom: 10px; }
+              .content { margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <h1>${title}</h1>
+            <div class="content">${content.replace(/\n/g, '<br>')}</div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const shareContent = async (title: string, content: string) => {
+    const shareData = {
+      title: title,
+      text: content.substring(0, 200) + '...',
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${title}\n\n${content}\n\nShared from Smart Blog Summarizer`);
+      alert('Content copied to clipboard!');
+    }
+  };
 
   const handleSummarise = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +213,23 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
+      {/* Theme Toggle Button */}
+      <div className="fixed top-4 right-4 z-50">
+        <Button
+          onClick={toggleTheme}
+          variant="ghost"
+          size="sm"
+          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full p-2 hover:scale-110 transition-all duration-300"
+        >
+          {isDarkMode ? (
+            <Sun className="h-5 w-5 text-yellow-500" />
+          ) : (
+            <Moon className="h-5 w-5 text-slate-600" />
+          )}
+        </Button>
+      </div>
+
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -227,7 +349,11 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20">
-                            {scrapedText.length} characters
+                            {getWordCount(scrapedText)} words
+                          </Badge>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 border-blue-200">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {getReadingTime(scrapedText)} min read
                           </Badge>
                           <Button
                             variant="ghost"
@@ -260,16 +386,51 @@ export default function Home() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 border-purple-200">
-                            Intelligent
+                            <Hash className="h-3 w-3 mr-1" />
+                            {getWordCount(summary)} words
                           </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(summary, "summary")}
-                            className="text-slate-600 hover:text-purple-600"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 border-purple-200">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {getReadingTime(summary)} min read
+                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => exportToMarkdown("Smart Summary", summary)}
+                              className="text-slate-600 hover:text-purple-600"
+                              title="Export as Markdown"
+                            >
+                              <FileTextIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => exportToPDF("Smart Summary", summary)}
+                              className="text-slate-600 hover:text-purple-600"
+                              title="Export as PDF"
+                            >
+                              <FileDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => shareContent("Smart Summary", summary)}
+                              className="text-slate-600 hover:text-purple-600"
+                              title="Share"
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(summary, "summary")}
+                              className="text-slate-600 hover:text-purple-600"
+                              title="Copy to clipboard"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       <Textarea 
@@ -295,14 +456,48 @@ export default function Home() {
                           <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/20 border-green-200">
                             اردو
                           </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(urduSummary, "urdu")}
-                            className="text-slate-600 hover:text-green-600"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-900/20 border-green-200">
+                            <Hash className="h-3 w-3 mr-1" />
+                            {getWordCount(urduSummary)} words
+                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => exportToMarkdown("Urdu Translation", urduSummary)}
+                              className="text-slate-600 hover:text-green-600"
+                              title="Export as Markdown"
+                            >
+                              <FileTextIcon className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => exportToPDF("Urdu Translation", urduSummary)}
+                              className="text-slate-600 hover:text-green-600"
+                              title="Export as PDF"
+                            >
+                              <FileDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => shareContent("Urdu Translation", urduSummary)}
+                              className="text-slate-600 hover:text-green-600"
+                              title="Share"
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(urduSummary, "urdu")}
+                              className="text-slate-600 hover:text-green-600"
+                              title="Copy to clipboard"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       <Textarea 
