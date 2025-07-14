@@ -51,5 +51,3 @@ The app is fully responsive and works great on mobile devices. You can even add 
 Feel free to contribute to this project by submitting issues or pull requests.
 
 ---
-
-**Built with ❤️ for the Nexium Assignment**
